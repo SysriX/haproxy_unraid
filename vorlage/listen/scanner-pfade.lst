@@ -1,0 +1,23 @@
+# Pfade, die nur Angreifer/Scanner aufrufen (gilt nur für externe Quellen).
+# Ein Treffer sperrt die IP automatisch für 15 min Ruhe. Betreibst du z. B. WordPress,
+# die wp-Zeilen entfernen.
+/.env
+/.git/
+/.aws/
+/.ssh/
+/.DS_Store
+/wp-login.php
+/wp-admin
+/xmlrpc.php
+/phpmyadmin
+/pma/
+/cgi-bin/
+/boaform
+/HNAP1
+/vendor/phpunit
+/actuator
+/server-status
+/geoserver
+/solr/admin
+/druid/
+/manager/html

@@ -1,0 +1,37 @@
+#!/bin/bash
+# Übernimmt die Konfiguration aus bearbeiten/ sicher (im Container ausführen):
+#   docker exec haproxy-unraid hap-uebernehmen            prüfen + übernehmen
+#   docker exec haproxy-unraid hap-uebernehmen --pruefen  nur prüfen
+#   docker exec haproxy-unraid hap-uebernehmen --zurueck  auf vorher/ zurückspringen
+# Ablauf: dienste.map passt zu den Backends -> haproxy -c -> aktiv/ nach vorher/,
+# bearbeiten/ nach aktiv/ -> neu laden ohne Verbindungsabbruch -> Kontrolle -> sonst zurück.
+set -uo pipefail
+. /usr/local/lib/hap-lib.sh
+
+case "${1:-}" in
+  --zurueck)
+    [ -f "$D/vorher/haproxy.cfg" ] || fehler "kein vorher/ vorhanden"
+    pruefe_cfg vorher || fehler "auch vorher/ ist ungültig"
+    rm -rf "$D/tausch"; cp -r "$D/aktiv" "$D/tausch"
+    nach_aktiv vorher; rm -rf "$D/vorher"; mv "$D/tausch" "$D/vorher"
+    neu_laden && log "Zurück auf die vorige Konfiguration." || fehler "HAProxy antwortet nicht"
+    exit 0;;
+esac
+
+log "Prüfe dienste.map ..."
+pruefe_map bearbeiten || fehler "dienste.map passt nicht zu den Backends – nichts übernommen"
+log "Prüfe HAProxy-Konfiguration ..."
+pruefe_cfg bearbeiten || fehler "Konfiguration ungültig – nichts übernommen"
+[ "${1:-}" = --pruefen ] && { log "OK (nur geprüft)"; exit 0; }
+
+if diff -rq "$D/bearbeiten" "$D/aktiv" >/dev/null 2>&1; then log "Keine Änderung."; exit 0; fi
+rm -rf "$D/vorher"; cp -r "$D/aktiv" "$D/vorher"
+nach_aktiv bearbeiten
+if neu_laden; then
+  log "Übernommen und neu geladen."; diff -ru "$D/vorher" "$D/aktiv" | head -60
+else
+  log "Neue Konfiguration läuft nicht sauber – springe zurück ..."
+  nach_aktiv vorher
+  neu_laden && fehler "zurückgesprungen, vorige Konfiguration läuft wieder" \
+            || fehler "auch nach dem Rücksprung keine Antwort – Container neu starten"
+fi

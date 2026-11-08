@@ -1,0 +1,31 @@
+#!/bin/bash
+# Führt Aufträge der Weboberfläche (haproxy-ui) im HAProxy-Container aus.
+# haproxy-ui schreibt <HAPROXY_DIR>/.ui/auftrag ("<id> <aktion>"), dieser Wächter startet
+# hap-uebernehmen bzw. hap-zertifikate und schreibt .ui/ergebnis ("<id> <aktion> <code> <zeit>" + Ausgabe).
+# So bleibt jede Übernahme bei Prüfung + Rücksprung, auch wenn sie aus der Oberfläche kommt.
+set -uo pipefail
+. /usr/local/lib/hap-lib.sh
+
+U="$D/.ui"
+mkdir -p "$U"; chmod 770 "$U"
+while true; do
+  touch "$U/waechter"          # Lebenszeichen für die Oberfläche
+  if [ -f "$U/auftrag" ]; then
+    read -r ID AKTION _ < "$U/auftrag" || true
+    case "${AKTION:-}" in
+      pruefen)     CMD=(hap-uebernehmen --pruefen);;
+      uebernehmen) CMD=(hap-uebernehmen);;
+      zurueck)     CMD=(hap-uebernehmen --zurueck);;
+      zertifikate) CMD=(hap-zertifikate);;
+      *)           CMD=(false);;
+    esac
+    case "${ID:-}" in *[!A-Za-z0-9-]*|"") ID=ungueltig;; esac
+    log "Auftrag aus der Oberfläche: ${AKTION:-?}"
+    OUT="$("${CMD[@]}" 2>&1)"; CODE=$?
+    { echo "$ID ${AKTION:-?} $CODE $(date -Iseconds)"; echo "$OUT"; } > "$U/ergebnis.neu"
+    mv "$U/ergebnis.neu" "$U/ergebnis"
+    rm -f "$U/auftrag"
+    echo "$OUT" | sed 's/^/  /'
+  fi
+  sleep 1
+done

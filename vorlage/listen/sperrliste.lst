@@ -1,0 +1,2 @@
+# Dauerhaft gesperrte Adressen/Netze, eine je Zeile (z. B. 203.0.113.7 oder 198.51.100.0/24)
+# Danach: docker exec haproxy-unraid hap-uebernehmen

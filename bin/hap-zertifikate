@@ -1,0 +1,43 @@
+#!/bin/bash
+# Holt Zertifikate aus Cert Warden für Dienste, bei denen HAProxy TLS selbst beendet.
+# Läuft automatisch im Container (stündlich); von Hand:  docker exec haproxy-unraid hap-zertifikate
+#
+# <HAPROXY_DIR>/certs.conf, je Zeile:  <name-in-cert-warden> <zertifikat-api-key>.<schluessel-api-key>
+# Ergebnis: certs/<name>.pem (Schlüssel + Zertifikat + Kette). HAProxy wählt per Name im Zertifikat.
+# Nur vollständige, passende und noch > 1 Tag gültige Zertifikate werden übernommen;
+# fällt Cert Warden aus, bleiben die vorhandenen liegen. Neu geladen wird nur bei Änderungen.
+set -uo pipefail
+. /usr/local/lib/hap-lib.sh
+
+CONF="$D/certs.conf"
+OUT="$D/certs"
+BASE="https://$CW_HOST:4055/certwarden/api/v1/download/privatecertchains"
+[ -f "$CONF" ] || exit 0
+TMP="$(mktemp -d)"; trap 'rm -rf "$TMP"' EXIT
+changed=0
+
+while read -r NAME KEY _; do
+  [ -z "${NAME:-}" ] && continue; [ "${NAME:0:1}" = "#" ] && continue
+  case "$NAME" in *[!A-Za-z0-9._-]*|000-ersatz) log "ungültiger Name '$NAME' – übersprungen"; continue;; esac
+  # --resolve: Name von Cert Warden direkt auf CW_IP, unabhängig vom DNS. Cert Warden braucht
+  # für seinen Namen ein echtes Zertifikat (serverdefault); bis dahin CW_UNSICHER=1 setzen.
+  if ! curl -fsS ${CW_UNSICHER:+-k} --max-time 30 --resolve "$CW_HOST:4055:$CW_IP" \
+       -H "X-API-Key: $KEY" "$BASE/$NAME" -o "$TMP/$NAME.pem"; then
+    log "$NAME nicht abrufbar – altes Zertifikat bleibt"; continue
+  fi
+  A="$(openssl x509 -noout -pubkey -in "$TMP/$NAME.pem" 2>/dev/null | sha256sum)" || A=x
+  B="$(openssl pkey -pubout -in "$TMP/$NAME.pem" 2>/dev/null | sha256sum)" || B=y
+  if [ "$A" != "$B" ] || ! openssl x509 -checkend 86400 -noout -in "$TMP/$NAME.pem" >/dev/null 2>&1; then
+    log "$NAME unvollständig oder abgelaufen – altes Zertifikat bleibt"; continue
+  fi
+  if ! cmp -s "$TMP/$NAME.pem" "$OUT/$NAME.pem"; then
+    install -m 600 "$TMP/$NAME.pem" "$OUT/$NAME.pem"
+    log "neu: $NAME ($(openssl x509 -noout -enddate -in "$OUT/$NAME.pem"))"
+    changed=1
+  fi
+done < "$CONF"
+
+if [ "$changed" = 1 ]; then
+  pruefe_cfg aktiv || fehler "Konfiguration mit neuen Zertifikaten ungültig – kein Neuladen"
+  neu_laden && log "HAProxy neu geladen" || fehler "Neuladen fehlgeschlagen"
+fi

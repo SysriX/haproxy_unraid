@@ -1,0 +1,18 @@
+# Name                         Backend:Zugang:Modus
+# <Name_CertWarden> ersetzt der Container beim ersten Start mit CW_HOST; <Domain> = eure Domain.
+#   Zugang: alle   = von außen und innen
+#           intern = nur aus intern-netze.lst (von außen: abgelehnt, Grund "nur_intern")
+#   Modus:  tls    = HAProxy beendet TLS (Zertifikat <name>.pem in certs/), Backend "mode http"
+#           durch  = verschlüsselt durchreichen, Backend "mode tcp"
+# Namen klein schreiben. Nicht eingetragene Namen werden abgelehnt ("unbekannter_name").
+#
+# Damit es auch von INNEN geht: im internen DNS (Zone der Domain) einen A-Eintrag
+# des Namens auf <IP_HAProxy> setzen – statt auf den bisherigen Reverse-Proxy.
+
+<Name_CertWarden>              be_certwarden:intern:durch
+# mail.<Domain>                be_grommunio:alle:durch
+# autodiscover.<Domain>        be_grommunio:alle:durch
+# nextcloud.<Domain>           be_nextcloud:alle:tls
+# www.<Domain>                 be_web:alle:tls
+# unraid.<Domain>              be_unraid:intern:tls
+# ha.<Domain>                  be_homeassistant:alle:tls

@@ -1,0 +1,9 @@
+# Interne Netze (Quelle gilt als "intern": keine Zähler/Sperren, darf "intern"-Dienste)
+# Alle privaten Bereiche – passt für jedes Netz. Enger fassen geht (nur eigene Netze eintragen).
+# Wichtig: Die Firewall darf externe Zugriffe NICHT auf eine eigene Adresse umschreiben
+# (kein Outbound-NAT Richtung HAProxy, keine NAT-Reflection), sonst wäre außen = innen.
+127.0.0.0/8
+10.0.0.0/8
+172.16.0.0/12
+192.168.0.0/16
+fd00::/8
