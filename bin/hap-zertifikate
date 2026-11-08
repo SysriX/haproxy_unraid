@@ -9,6 +9,9 @@
 set -uo pipefail
 . /usr/local/lib/hap-lib.sh
 
+if [ -z "${CW_HOST:-}" ] || [ "${MIT_CW:-1}" = 0 ]; then
+  log "kein Cert Warden eingerichtet (CW_IP/CW_HOST leer) – nichts zu holen"; exit 0
+fi
 CONF="$D/certs.conf"
 OUT="$D/certs"
 BASE="https://$CW_HOST:4055/certwarden/api/v1/download/privatecertchains"
