@@ -33,7 +33,7 @@ Läuft **allein**; Cert Warden und haproxy-ui sind optional.
 | Konfiguration | `/usr/local/etc/haproxy` | ja | appdata-Ordner. Unraid ohne Cache: Plattenpfad wie `/mnt/disk1/appdata/haproxy` |
 | Statistik-Passwort | `STATS_PASS` | ja | Benutzer `admin`, Port 8404 |
 | Cert Warden IP | `CW_IP` | nein | feste IP von certwarden-unraid; leer = ohne Cert Warden |
-| Cert Warden Name | `CW_HOST` | nein | Name, auf den das Zertifikat von Cert Warden lautet |
+| Cert Warden Name | `CW_HOST` | nein | Adresse von Cert Warden **selbst** (z. B. `certwarden.example.de`), nicht die Zertifikate der Dienste – die stehen in `certs.conf` |
 | Home Assistant Syslog | `HA_SYSLOG` | nein | `IP:Port` (UDP) für JSON-Logs; `127.0.0.1:5514` = aus |
 | Zertifikats-Intervall | `CERT_INTERVALL` | nein | Sekunden zwischen zwei Abrufen (Standard 3600) |
 | Cert Warden ohne Prüfung | `CW_UNSICHER` | nein | `1` = Zertifikat von Cert Warden nicht prüfen (nur am Anfang) |
@@ -69,6 +69,16 @@ Das Backend dazu kommt in `bearbeiten/dienste.cfg`.
 
 - **Mit Cert Warden:** in `certs.conf` je Zeile `<name-in-cert-warden> <zertifikat-api-key>.<schluessel-api-key>`.
 - **Ohne Cert Warden:** eigene `.pem` (Schlüssel + Zertifikat + Kette) nach `certs/` legen, dann `hap-uebernehmen`.
+
+**Beliebig viele Zertifikate und Domains:** je Zertifikat eine Zeile in `certs.conf`, z. B.
+
+```
+mail   <key>.<key>     # mail.deinedomain.de
+cloud  <key>.<key>     # cloud.andere-domain.de
+web    <key>.<key>     # deinedomain.de + www.deinedomain.de
+```
+
+Daraus werden `certs/mail.pem`, `certs/cloud.pem`, `certs/web.pem`. HAProxy lädt den ganzen Ordner und wählt je Anfrage das Zertifikat, das zum angefragten Namen (SNI) passt – egal zu welcher Domain. Wildcards wie `*.deinedomain.de` (nur per DNS-01) decken alle Subdomains mit einer Zeile ab. Passt kein Zertifikat, liefert HAProxy das Ersatz-Zertifikat `000-ersatz.pem`.
 
 ## Bedienung (Unraid-Konsole)
 
