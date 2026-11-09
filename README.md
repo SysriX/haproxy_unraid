@@ -2,7 +2,7 @@
 
 HAProxy 3.4 LTS (offizielles Image `haproxy:3.4-alpine`) als zentraler Eingang für außen und innen – vorbereitet für Unraid.
 
-Teil der Sammlung [unraid-images](https://github.com/SysriX/unraid-images) – Übersicht aller Pakete.
+Weitere Unraid-Pakete: [haproxy-ui](https://github.com/SysriX/haproxy-ui_unraid), [certwarden-unraid](https://github.com/SysriX/certwarden_unraid)
 
 `ghcr.io/sysrix/haproxy-unraid:latest`
 
@@ -23,7 +23,7 @@ Läuft **allein**; Cert Warden und haproxy-ui sind optional.
 
 1. Vorlage holen (einmal in der Unraid-Konsole), danach in **Apps › Private** `haproxy-unraid` installieren:
    ```bash
-   curl -fsSL https://raw.githubusercontent.com/SysriX/unraid-images/main/unraid/private-vorlagen.sh | bash
+   mkdir -p /boot/config/plugins/community.applications/private/sysrix && curl -fsSL https://raw.githubusercontent.com/SysriX/haproxy_unraid/main/templates/haproxy-unraid.xml -o /boot/config/plugins/community.applications/private/sysrix/haproxy-unraid.xml
    ```
 2. Netzwerk `br0` (bzw. das VLAN der Firewall) und eine **feste IP** wählen. Keine Portfreigaben nötig; die Firewall leitet WAN 80/443 auf diese IP.
 3. Variablen ausfüllen (siehe unten) und starten. Beim ersten Start wird die Vorlage nach `appdata/haproxy/` kopiert.
