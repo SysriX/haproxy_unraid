@@ -2,6 +2,8 @@
 
 HAProxy 3.4 LTS (offizielles Image `haproxy:3.4-alpine`) als zentraler Eingang für außen und innen – vorbereitet für Unraid.
 
+Teil der Sammlung [unraid-images](https://github.com/SysriX/unraid-images) – Übersicht aller Pakete.
+
 `ghcr.io/sysrix/haproxy-unraid:latest`
 
 ## Was es kann
@@ -13,7 +15,7 @@ HAProxy 3.4 LTS (offizielles Image `haproxy:3.4-alpine`) als zentraler Eingang f
 - **Zertifikate aus Cert Warden** (optional), stündlich abgeholt, neu geladen nur bei Änderung
 - **Statistik und Prometheus** an Port 8404 (nur interne Netze)
 - **JSON-Zugriffslogs** per Syslog, z. B. an einen Home-Assistant-Zugriffsmonitor
-- Weboberfläche dazu: [haproxy-ui](../haproxy-ui/README.md) (optional)
+- Weboberfläche dazu: [haproxy-ui](https://github.com/SysriX/haproxy-ui_unraid) (optional)
 
 Läuft **allein**; Cert Warden und haproxy-ui sind optional.
 
@@ -89,7 +91,7 @@ Daraus werden `certs/mail.pem`, `certs/cloud.pem`, `certs/web.pem`. HAProxy läd
 | `docker exec haproxy-unraid hap-uebernehmen --zurueck` | vorige Konfiguration |
 | `docker exec haproxy-unraid hap-zertifikate` | Zertifikate jetzt aus Cert Warden holen |
 
-Bequemer geht es mit der Weboberfläche [haproxy-ui](../haproxy-ui/README.md).
+Bequemer geht es mit der Weboberfläche [haproxy-ui](https://github.com/SysriX/haproxy-ui_unraid).
 
 ## Ports
 
@@ -102,3 +104,9 @@ Bequemer geht es mit der Weboberfläche [haproxy-ui](../haproxy-ui/README.md).
 ## Updates
 
 Das Image wird automatisch neu gebaut, sobald das offizielle HAProxy-Image aktualisiert wird. Unraid zeigt dann „Update verfügbar“. Tags: `latest`, die HAProxy-Version (z. B. `3.4.1`) und `Version-Datum`.
+
+## Hilfe
+
+Fragen und Fehler bitte als [GitHub-Issue](https://github.com/SysriX/haproxy_unraid/issues).
+
+Lizenz: MIT – siehe [LICENSE](LICENSE). HAProxy steht unter eigener Lizenz.

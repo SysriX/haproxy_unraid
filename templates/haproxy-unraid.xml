@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<Container version="2">
+  <Name>haproxy-unraid</Name>
+  <Repository>ghcr.io/sysrix/haproxy-unraid:latest</Repository>
+  <Registry>https://github.com/SysriX/haproxy_unraid/pkgs/container/haproxy-unraid</Registry>
+  <Network>br0</Network>
+  <MyIP/>
+  <Shell>bash</Shell>
+  <Privileged>false</Privileged>
+  <Support>https://github.com/SysriX/haproxy_unraid/issues</Support>
+  <Project>https://github.com/SysriX/haproxy_unraid</Project>
+  <ReadMe>https://github.com/SysriX/haproxy_unraid/blob/main/README.md</ReadMe>
+  <Overview>HAProxy 3.4 LTS (offizielles Image) als zentraler Eingang für außen und innen: TLS-Ende mit Zertifikaten aus Cert Warden oder verschlüsseltes Durchreichen per Name (SNI), interne Dienste, Schutzregeln mit benannten Ablehnungsgründen (Scanner, Passwort-Raten, unbekannte Namen) und JSON-Logs für den Home-Assistant-Zugriffsmonitor. Änderungen werden geprüft übernommen und springen bei Fehlern automatisch zurück.&#xD;
+&#xD;
+Netzwerk: eigenes Unraid-Netz (br0 bzw. das VLAN der Firewall) mit fester IP – keine Portfreigaben, die Firewall leitet WAN 80/443 auf diese IP. Konfiguration ändern: Dateien in appdata/bearbeiten/ anpassen, dann in der Konsole hap-uebernehmen – oder bequem über die Weboberfläche haproxy-ui.</Overview>
+  <Category>Network:Proxy Network:Management Security:</Category>
+  <ExtraSearchTerms>haproxy reverse proxy ssl tls sni load balancer cert warden</ExtraSearchTerms>
+  <WebUI>http://[IP]:[PORT:8404]/</WebUI>
+  <TemplateURL>https://raw.githubusercontent.com/SysriX/haproxy_unraid/main/templates/haproxy-unraid.xml</TemplateURL>
+  <Icon>https://raw.githubusercontent.com/SysriX/haproxy_unraid/main/icon.svg</Icon>
+  <ExtraParams>--hostname haproxy --log-opt max-size=20m --log-opt max-file=3 --ulimit nofile=65536:65536</ExtraParams>
+  <PostArgs/>
+  <Requires>Eigenes Docker-Netz in Unraid (Einstellungen › Docker › benutzerdefinierte Netzwerke, z. B. br0) mit freier fester IP. Optional: Cert Warden (certwarden-unraid) für automatische Zertifikate, haproxy-ui als Weboberfläche.</Requires>
+  <License>MIT</License>
+  <Config Name="Konfiguration" Target="/usr/local/etc/haproxy" Default="/mnt/user/appdata/haproxy" Mode="rw" Description="bearbeiten/, aktiv/, vorher/, certs/ und certs.conf. Beim ersten Start aus der Vorlage angelegt. Unraid ohne Cache: Plattenpfad wie /mnt/disk1/appdata/haproxy verwenden." Type="Path" Display="always" Required="true" Mask="false">/mnt/disk1/appdata/haproxy</Config>
+  <Config Name="Cert Warden IP" Target="CW_IP" Default="" Mode="" Description="Optional: feste IP des Cert-Warden-Containers (HTTP-01-Prüfung Port 4060, API Port 4055). Leer = HAProxy läuft ohne Cert Warden, Zertifikate dann selbst nach certs/ legen." Type="Variable" Display="always" Required="false" Mask="false"/>
+  <Config Name="Cert Warden Name" Target="CW_HOST" Default="" Mode="" Description="Optional: Adresse von Cert Warden selbst (nicht die Zertifikate der Dienste), z. B. certwarden.example.de – darüber holt HAProxy per API alle Zertifikate aus certs.conf. Leer = ohne Cert Warden." Type="Variable" Display="always" Required="false" Mask="false"/>
+  <Config Name="Home Assistant Syslog" Target="HA_SYSLOG" Default="127.0.0.1:5514" Mode="" Description="IP:Port des Home-Assistant-Zugriffsmonitors (access_monitor, UDP). Leer lassen bzw. 127.0.0.1:5514 = aus." Type="Variable" Display="always" Required="false" Mask="false">127.0.0.1:5514</Config>
+  <Config Name="Statistik-Passwort" Target="STATS_PASS" Default="" Mode="" Description="Passwort für die Statistikseite (Benutzer admin, Port 8404, nur aus internen Netzen)." Type="Variable" Display="always" Required="true" Mask="true"/>
+  <Config Name="Zertifikats-Intervall" Target="CERT_INTERVALL" Default="3600" Mode="" Description="Sekunden zwischen zwei Abrufen der Zertifikate aus Cert Warden." Type="Variable" Display="advanced" Required="false" Mask="false">3600</Config>
+  <Config Name="Cert Warden ohne Zertifikatsprüfung" Target="CW_UNSICHER" Default="" Mode="" Description="1 = Zertifikat von Cert Warden nicht prüfen (nur bis Cert Warden sein eigenes Zertifikat hat)." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="Weboberfläche zulassen" Target="UI_WAECHTER" Default="1" Mode="" Description="1 = Aufträge aus haproxy-ui (Prüfen, Übernehmen, Zurück, Zertifikate) ausführen. 0 = aus." Type="Variable" Display="advanced" Required="false" Mask="false">1</Config>
+  <Config Name="Zeitzone" Target="TZ" Default="Europe/Berlin" Mode="" Description="Zeitzone für Logs." Type="Variable" Display="advanced" Required="false" Mask="false">Europe/Berlin</Config>
+</Container>
