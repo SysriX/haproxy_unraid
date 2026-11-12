@@ -9,7 +9,7 @@ Weitere Unraid-Pakete: [haproxy-ui](https://github.com/SysriX/haproxy-ui_unraid)
 ## Was es kann
 
 - **TLS-Ende** mit eigenen Zertifikaten oder **verschlüsselt durchreichen** – je Dienst über den Namen (SNI)
-- **intern / alle**: Dienste nur aus internen Netzen oder auch von außen erreichbar
+- **intern / extern / alle**: Dienste nur aus internen Netzen, nur von außen oder von beiden Seiten erreichbar
 - **Schutzregeln** mit benannten Ablehnungsgründen: Scanner-Pfade, Passwort-Raten, unbekannte Namen, Sperrliste, automatische Sperre für 15 Minuten
 - **Sicheres Übernehmen**: jede Änderung wird geprüft, ohne Verbindungsabbruch neu geladen und springt bei Fehlern automatisch zurück
 - **Zertifikate aus Cert Warden** (optional), stündlich abgeholt, neu geladen nur bei Änderung
@@ -62,10 +62,12 @@ unraid.example.de      be_unraid:intern:tls
 mail.example.de        be_mail:alle:durch
 ```
 
-- **Zugang** `alle` = außen und innen, `intern` = nur aus `listen/intern-netze.lst`
+- **Zugang** `alle` = außen und innen, `intern` = nur aus `listen/intern-netze.lst`, `extern` = nur von außen
 - **Modus** `tls` = HAProxy beendet TLS (Backend `mode http`), `durch` = verschlüsselt durchreichen (Backend `mode tcp`)
 
 Das Backend dazu kommt in `bearbeiten/dienste.cfg`.
+
+Bequemer geht es mit dem **Assistenten in [haproxy-ui](https://github.com/SysriX/haproxy-ui_unraid)**: Adresse, Zugang, Backend und Regeln zusammenklicken. Er schreibt nur in die markierten Blöcke `>>> haproxy-ui … <<< haproxy-ui` in `haproxy.cfg` und `dienste.cfg`.
 
 ### Zertifikate
 

@@ -26,7 +26,7 @@ pruefe_map() {   # $1 = Unterordner
     [ -z "${name:-}" ] && continue; [ "${name:0:1}" = "#" ] && continue
     case "$name$wert" in *"<"*) echo "  $name: Platzhalter <...> noch nicht ersetzt"; ok=1; continue;; esac
     IFS=: read -r be zugang modus <<<"$wert"
-    case "$zugang" in alle|intern) ;; *) echo "  $name: Zugang '$zugang' (erlaubt: alle|intern)"; ok=1; continue;; esac
+    case "$zugang" in alle|intern|extern) ;; *) echo "  $name: Zugang '$zugang' (erlaubt: alle|intern|extern)"; ok=1; continue;; esac
     case "$modus" in tls) want=http;; durch) want=tcp;; *) echo "  $name: Modus '$modus' (erlaubt: tls|durch)"; ok=1; continue;; esac
     mode="$(awk -v b="$be" '
       $1=="backend" && $2==b {inb=1; found=1; next}
