@@ -2,6 +2,7 @@
 # <Name_CertWarden> ersetzt der Container beim ersten Start mit CW_HOST; <Domain> = eure Domain.
 #   Zugang: alle   = von außen und innen
 #           intern = nur aus intern-netze.lst (von außen: abgelehnt, Grund "nur_intern")
+#           extern = nur von außen (von innen: abgelehnt, Grund "nur_extern")
 #   Modus:  tls    = HAProxy beendet TLS (Zertifikat <name>.pem in certs/), Backend "mode http"
 #           durch  = verschlüsselt durchreichen, Backend "mode tcp"
 # Namen klein schreiben. Nicht eingetragene Namen werden abgelehnt ("unbekannter_name").
@@ -16,3 +17,8 @@
 # www.<Domain>                 be_web:alle:tls
 # unraid.<Domain>              be_unraid:intern:tls
 # ha.<Domain>                  be_homeassistant:alle:tls
+# jellyfin.<Domain>            be_jellyfin:alle:tls
+# auth.<Domain>                be_authentik:alle:tls
+# --- von Authentik geschützte Webseiten (Proxy-Anbieter + eingebetteter Outpost)
+# haproxy-ui.<Domain>          be_authentik:intern:tls
+# tools.<Domain>               be_authentik:alle:tls
