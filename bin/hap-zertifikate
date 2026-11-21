@@ -33,6 +33,23 @@ while read -r NAME KEY _; do
   if [ "$A" != "$B" ] || ! openssl x509 -checkend 86400 -noout -in "$TMP/$NAME.pem" >/dev/null 2>&1; then
     log "$NAME unvollständig oder abgelaufen – altes Zertifikat bleibt"; continue
   fi
+  # Kette vollständig? Nur das eigene Zertifikat (ohne Zwischenzertifikat) → Browser kommen klar, aber Programme
+  # (VERA-Connect, curl, Python, Android) melden „unable to get local issuer certificate“. Dann per AIA ergänzen.
+  if [ "$(grep -c 'BEGIN CERTIFICATE' "$TMP/$NAME.pem")" -lt 2 ]; then
+    cur="$TMP/$NAME.pem"; n=0
+    while [ $n -lt 3 ]; do
+      url="$(openssl x509 -noout -ext authorityInfoAccess -in "$cur" 2>/dev/null | sed -n 's/.*CA Issuers - URI:\(http[^ ]*\).*/\1/p' | head -n1)"
+      [ -n "$url" ] || break
+      curl -fsS --max-time 20 "$url" -o "$TMP/ca$n.raw" || break
+      if grep -q 'BEGIN CERTIFICATE' "$TMP/ca$n.raw"; then cp "$TMP/ca$n.raw" "$TMP/ca$n.pem"
+      else openssl x509 -inform DER -in "$TMP/ca$n.raw" -out "$TMP/ca$n.pem" 2>/dev/null || break; fi
+      # eine Wurzel (selbst signiert) gehört nicht in die Kette
+      [ "$(openssl x509 -noout -subject -in "$TMP/ca$n.pem")" = "$(openssl x509 -noout -issuer -in "$TMP/ca$n.pem" | sed 's/^issuer=/subject=/')" ] && break
+      cat "$TMP/ca$n.pem" >> "$TMP/$NAME.pem"
+      cur="$TMP/ca$n.pem"; n=$((n + 1))
+    done
+    log "$NAME: Kette war unvollständig – $n Zwischenzertifikat(e) ergänzt (in Cert Warden die Kette prüfen)"
+  fi
   if ! cmp -s "$TMP/$NAME.pem" "$OUT/$NAME.pem"; then
     install -m 600 "$TMP/$NAME.pem" "$OUT/$NAME.pem"
     log "neu: $NAME ($(openssl x509 -noout -enddate -in "$OUT/$NAME.pem"))"

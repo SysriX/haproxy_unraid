@@ -17,7 +17,7 @@ Netzwerk: eigenes Unraid-Netz (br0 bzw. das VLAN der Firewall) mit fester IP –
   <ExtraSearchTerms>haproxy reverse proxy ssl tls sni load balancer cert warden</ExtraSearchTerms>
   <WebUI>http://[IP]:[PORT:8404]/</WebUI>
   <TemplateURL>https://raw.githubusercontent.com/SysriX/haproxy_unraid/main/templates/haproxy-unraid.xml</TemplateURL>
-  <Icon>https://raw.githubusercontent.com/SysriX/haproxy_unraid/main/icon.svg</Icon>
+  <Icon>https://raw.githubusercontent.com/SysriX/haproxy_unraid/main/icon.png</Icon>
   <ExtraParams>--hostname haproxy --log-opt max-size=20m --log-opt max-file=3 --ulimit nofile=65536:65536</ExtraParams>
   <PostArgs/>
   <Requires>Eigenes Docker-Netz in Unraid (Einstellungen › Docker › benutzerdefinierte Netzwerke, z. B. br0) mit freier fester IP. Optional: Cert Warden (certwarden-unraid) für automatische Zertifikate, haproxy-ui als Weboberfläche.</Requires>
